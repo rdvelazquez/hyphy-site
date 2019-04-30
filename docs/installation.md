@@ -3,6 +3,11 @@ Installation
 ===========
 Please note that HyPhy is not currently available for Windows.
 
+## Testing mkdocs-snippet-plugin
+
+{{ snippet('git@github.com:veg/hyphy-analyses.git', 'README.md', '# HyPhy standalone analyses') }}
+
+
 ### Installing with Conda
 
 `conda install hyphy`
