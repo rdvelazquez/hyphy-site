@@ -72,6 +72,21 @@ After optimizing branch lengths and nucleotide substitution parameters, FEL fits
 
 **If you use FEL in your analysis, please cite the following:** [`Kosakovsky Pond, SL and Frost, SDW. "Not So Different After All: A Comparison of Methods for Detecting Amino Acid Sites Under Selection." Mol. Biol. Evol. 22, 1208--1222 (2005).`](https://doi.org/10.1093/molbev/msi105)
 
+<!--------------------------------------------------------------------------------------->
+### FEL-contrast
+
+For each site in a codon alignment, estimate whether or not dN/dS ratios
+differ between sets of branches defined _a priori_. If the branches are associated with
+different selective environments, this could be used to generate a list of sites that may
+be evolving at different rates (under different selective pressures) in these environments.
+
+- Outputs a list of sites where `test` branches have a statistically detectable difference
+    in dN/dS from `reference` branches.
+- Could be used to test for **differential** selection pressures, for example between
+    host and recipient or individual anatomical compartments in HIV-1, or in between species
+    with different phenotypes/traits.
+
+[Further information About FEL-contrast](fel-contrast.md)
 
 <!--------------------------------------------------------------------------------------->
 ## FUBAR 

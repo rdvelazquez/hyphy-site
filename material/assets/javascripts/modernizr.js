@@ -1,6 +1,6 @@
 /*!
- * modernizr v3.3.1
- * Build http://modernizr.com/download?-checked-contains-csstransforms3d-fontface-json-search-target-addtest-fnbind-printshiv-setclasses-testprop-dontmin
+ * modernizr v3.6.0
+ * Build https://modernizr.com/download?-checked-contains-csstransforms3d-fontface-json-search-target-addtest-fnbind-printshiv-setclasses-testprop-dontmin
  *
  * Copyright (c)
  *  Faruk Ates
@@ -36,7 +36,7 @@
 
   var ModernizrProto = {
     // The current version, dummy
-    _version: '3.3.1',
+    _version: '3.6.0',
 
     // Any settings that don't work as separate modules
     // can go in here as configuration.
@@ -159,7 +159,6 @@
             Modernizr[featureNameSplit[0]] = result;
           } else {
             // cast to a Boolean, if not one already
-            /* jshint -W053 */
             if (Modernizr[featureNameSplit[0]] && !(Modernizr[featureNameSplit[0]] instanceof Boolean)) {
               Modernizr[featureNameSplit[0]] = new Boolean(Modernizr[featureNameSplit[0]]);
             }
@@ -222,7 +221,11 @@
     if (Modernizr._config.enableClasses) {
       // Add the new classes
       className += ' ' + classPrefix + classes.join(' ' + classPrefix);
-      isSVG ? docElement.className.baseVal = className : docElement.className = className;
+      if (isSVG) {
+        docElement.className.baseVal = className;
+      } else {
+        docElement.className = className;
+      }
     }
 
   }
@@ -445,7 +448,6 @@
         Modernizr[featureNameSplit[0]] = test;
       } else {
         // cast to a Boolean, if not one already
-        /* jshint -W053 */
         if (Modernizr[featureNameSplit[0]] && !(Modernizr[featureNameSplit[0]] instanceof Boolean)) {
           Modernizr[featureNameSplit[0]] = new Boolean(Modernizr[featureNameSplit[0]]);
         }
@@ -454,9 +456,7 @@
       }
 
       // Set a single class (either `feature` or `no-feature`)
-      /* jshint -W041 */
       setClasses([(!!test && test != false ? '' : 'no-') + featureNameSplit.join('-')]);
-      /* jshint +W041 */
 
       // Trigger the event
       Modernizr._trigger(feature, test);
@@ -504,7 +504,6 @@
      * @preserve HTML5 Shiv 3.7.3 | @afarkas @jdalton @jon_neal @rem | MIT/GPL2 Licensed
      */
     ;(function(window, document) {
-      /*jshint evil:true */
       /** version */
       var version = '3.7.3';
 
@@ -708,10 +707,10 @@
                                                         'h.shivMethods&&(' +
                                                         // unroll the `createElement` calls
                                                         getElements().join().replace(/[\w\-:]+/g, function(nodeName) {
-          data.createElem(nodeName);
-          data.frag.createElement(nodeName);
-          return 'c("' + nodeName + '")';
-        }) +
+                                                          data.createElem(nodeName);
+                                                          data.frag.createElement(nodeName);
+                                                          return 'c("' + nodeName + '")';
+                                                        }) +
           ');return n}'
                                                        )(html5, data.frag);
       }
@@ -853,7 +852,7 @@
        */
       function addWrappers(ownerDocument) {
         var node,
-        nodes = ownerDocument.getElementsByTagName('*'),
+          nodes = ownerDocument.getElementsByTagName('*'),
           index = nodes.length,
           reElements = RegExp('^(?:' + getElements().join('|') + ')$', 'i'),
           result = [];
@@ -875,7 +874,7 @@
        */
       function createWrapper(element) {
         var node,
-        nodes = element.attributes,
+          nodes = element.attributes,
           index = nodes.length,
           wrapper = element.ownerDocument.createElement(shivNamespace + ':' + element.nodeName);
 
@@ -898,7 +897,7 @@
        */
       function shivCssText(cssText) {
         var pair,
-        parts = cssText.split('{'),
+          parts = cssText.split('{'),
           index = parts.length,
           reElements = RegExp('(^|[\\s,>+~])(' + getElements().join('|') + ')(?=[[\\s,>+~#.:]|$)', 'gi'),
           replacement = '$1' + shivNamespace + '\\:$2';
@@ -933,8 +932,8 @@
        */
       function shivPrint(ownerDocument) {
         var shivedSheet,
-        wrappers,
-        data = getExpandoData(ownerDocument),
+          wrappers,
+          data = getExpandoData(ownerDocument),
           namespaces = ownerDocument.namespaces,
           ownerWindow = ownerDocument.parentWindow;
 
@@ -958,9 +957,9 @@
           removeSheet();
 
           var imports,
-          length,
-          sheet,
-          collection = ownerDocument.styleSheets,
+            length,
+            sheet,
+            collection = ownerDocument.styleSheets,
             cssText = [],
             index = collection.length,
             sheets = Array(index);
@@ -1023,7 +1022,7 @@
         module.exports = html5;
       }
 
-    }(typeof window !== "undefined" ? window : this, document));
+    }(typeof window !== 'undefined' ? window : this, document));
   }
 
   ;
@@ -1187,6 +1186,7 @@
       body.parentNode.removeChild(body);
       docElement.style.overflow = docOverflow;
       // Trigger layout so kinetic scrolling isn't disabled in iOS6+
+      // eslint-disable-next-line
       docElement.offsetHeight;
     } else {
       div.parentNode.removeChild(div);
@@ -1213,6 +1213,44 @@
       return '-' + m1.toLowerCase();
     }).replace(/^ms-/, '-ms-');
   }
+  ;
+
+
+  /**
+   * wrapper around getComputedStyle, to fix issues with Firefox returning null when
+   * called inside of a hidden iframe
+   *
+   * @access private
+   * @function computedStyle
+   * @param {HTMLElement|SVGElement} - The element we want to find the computed styles of
+   * @param {string|null} [pseudoSelector]- An optional pseudo element selector (e.g. :before), of null if none
+   * @returns {CSSStyleDeclaration}
+   */
+
+  function computedStyle(elem, pseudo, prop) {
+    var result;
+
+    if ('getComputedStyle' in window) {
+      result = getComputedStyle.call(window, elem, pseudo);
+      var console = window.console;
+
+      if (result !== null) {
+        if (prop) {
+          result = result.getPropertyValue(prop);
+        }
+      } else {
+        if (console) {
+          var method = console.error ? 'error' : 'log';
+          console[method].call(console, 'getComputedStyle returning null, its possible modernizr test results are inaccurate');
+        }
+      }
+    } else {
+      result = !pseudo && elem.currentStyle && elem.currentStyle[prop];
+    }
+
+    return result;
+  }
+
   ;
 
   /**
@@ -1249,7 +1287,7 @@
       }
       conditionText = conditionText.join(' or ');
       return injectElementWithStyles('@supports (' + conditionText + ') { #modernizr { position: absolute; } }', function(node) {
-        return getComputedStyle(node, null).position == 'absolute';
+        return computedStyle(node, null, 'position') == 'absolute';
       });
     }
     return undefined;
@@ -1306,8 +1344,9 @@
     // inside of an SVG element, in certain browsers, the `style` element is only
     // defined for valid tags. Therefore, if `modernizr` does not have one, we
     // fall back to a less used element and hope for the best.
-    var elems = ['modernizr', 'tspan'];
-    while (!mStyle.style) {
+    // for strict XHTML browsers the hardly used samp element is used
+    var elems = ['modernizr', 'tspan', 'samp'];
+    while (!mStyle.style && elems.length) {
       afterInit = true;
       mStyle.modElem = createElement(elems.shift());
       mStyle.style = mStyle.modElem.style;
@@ -1592,11 +1631,9 @@ There is a custom `search` event implemented in webkit browsers when using an `i
 
   var blacklist = (function() {
     var ua = navigator.userAgent;
-    var wkvers = ua.match(/applewebkit\/([0-9]+)/gi) && parseFloat(RegExp.$1);
     var webos = ua.match(/w(eb)?osbrowser/gi);
     var wppre8 = ua.match(/windows phone/gi) && ua.match(/iemobile\/([0-9])+/gi) && parseFloat(RegExp.$1) >= 9;
-    var oldandroid = wkvers < 533 && ua.match(/android/gi);
-    return webos || oldandroid || wppre8;
+    return webos || wppre8;
   }());
   if (blacklist) {
     Modernizr.addTest('fontface', false);
@@ -1612,12 +1649,12 @@ There is a custom `search` event implemented in webkit browsers when using an `i
 ;
 
   /**
-   * If the browsers follow the spec, then they would expose vendor-specific style as:
+   * If the browsers follow the spec, then they would expose vendor-specific styles as:
    *   elem.style.WebkitBorderRadius
-   * instead of something like the following, which would be technically incorrect:
+   * instead of something like the following (which is technically incorrect):
    *   elem.style.webkitBorderRadius
 
-   * Webkit ghosts their properties in lowercase but Opera & Moz do not.
+   * WebKit ghosts their properties in lowercase but Opera & Moz do not.
    * Microsoft uses a lowercase `ms` instead of the correct `Ms` in IE8+
    *   erik.eae.net/archives/2008/03/10/21.48.10/
 
@@ -1665,6 +1702,7 @@ There is a custom `search` event implemented in webkit browsers when using an `i
    * @param {array.<string>} props - An array of properties to test for
    * @param {object} obj - An object or Element you want to use to test the parameters again
    * @param {boolean|object} elem - An Element to bind the property lookup again. Use `false` to prevent the check
+   * @returns {false|*} returns false if the prop is unsupported, otherwise the value that is supported
    */
   function testDOMProps(props, obj, elem) {
     var item;
@@ -1707,11 +1745,12 @@ There is a custom `search` event implemented in webkit browsers when using an `i
    * @param {HTMLElement|SVGElement} [elem] - An element used to test the property and value against
    * @param {string} [value] - A string of a css value
    * @param {boolean} [skipValueTest] - An boolean representing if you want to test if value sticks when set
+   * @returns {false|string} returns the string version of the property, or false if it is unsupported
    */
   function testPropsAll(prop, prefixed, elem, value, skipValueTest) {
 
     var ucProp = prop.charAt(0).toUpperCase() + prop.slice(1),
-    props = (prop + ' ' + cssomPrefixes.join(ucProp + ' ') + ucProp).split(' ');
+      props = (prop + ' ' + cssomPrefixes.join(ucProp + ' ') + ucProp).split(' ');
 
     // did they call .prefixed('boxSizing') or are we just testing a prop?
     if (is(prefixed, 'string') || is(prefixed, 'undefined')) {
@@ -1787,7 +1826,7 @@ There is a custom `search` event implemented in webkit browsers when using an `i
     "href": "http://dev.w3.org/csswg/css3-conditional/#at-supports"
   },{
     "name": "Related Github Issue",
-    "href": "github.com/Modernizr/Modernizr/issues/648"
+    "href": "https://github.com/Modernizr/Modernizr/issues/648"
   },{
     "name": "W3 Info",
     "href": "http://dev.w3.org/csswg/css3-conditional/#the-csssupportsrule-interface"
@@ -1812,36 +1851,7 @@ There is a custom `search` event implemented in webkit browsers when using an `i
 !*/
 
   Modernizr.addTest('csstransforms3d', function() {
-    var ret = !!testAllProps('perspective', '1px', true);
-    var usePrefix = Modernizr._config.usePrefixes;
-
-    // Webkit's 3D transforms are passed off to the browser's own graphics renderer.
-    //   It works fine in Safari on Leopard and Snow Leopard, but not in Chrome in
-    //   some conditions. As a result, Webkit typically recognizes the syntax but
-    //   will sometimes throw a false positive, thus we must do a more thorough check:
-    if (ret && (!usePrefix || 'webkitPerspective' in docElement.style)) {
-      var mq;
-      var defaultStyle = '#modernizr{width:0;height:0}';
-      // Use CSS Conditional Rules if available
-      if (Modernizr.supports) {
-        mq = '@supports (perspective: 1px)';
-      } else {
-        // Otherwise, Webkit allows this media query to succeed only if the feature is enabled.
-        // `@media (transform-3d),(-webkit-transform-3d){ ... }`
-        mq = '@media (transform-3d)';
-        if (usePrefix) {
-          mq += ',(-webkit-transform-3d)';
-        }
-      }
-
-      mq += '{#modernizr{width:7px;height:18px;margin:0;padding:0;border:0}}';
-
-      testStyles(defaultStyle + mq, function(elem) {
-        ret = elem.offsetWidth === 7 && elem.offsetHeight === 18;
-      });
-    }
-
-    return ret;
+    return !!testAllProps('perspective', '1px', true);
   });
 
 /*!
@@ -1957,227 +1967,3 @@ Check if browser implements ECMAScript 6 `String.prototype.contains` per specifi
 ;
 
 })(window, document);
-/*! matchMedia() polyfill - Test a CSS media type/query in JS. Authors & copyright (c) 2012: Scott Jehl, Paul Irish, Nicholas Zakas. Dual MIT/BSD license */
-/*! NOTE: If you're already including a window.matchMedia polyfill via Modernizr or otherwise, you don't need this part */
-(function(w) {
-  "use strict";
-  w.matchMedia = w.matchMedia || function(doc, undefined) {
-    var bool, docElem = doc.documentElement, refNode = docElem.firstElementChild || docElem.firstChild, fakeBody = doc.createElement("body"), div = doc.createElement("div");
-    div.id = "mq-test-1";
-    div.style.cssText = "position:absolute;top:-100em";
-    fakeBody.style.background = "none";
-    fakeBody.appendChild(div);
-    return function(q) {
-      div.innerHTML = '&shy;<style media="' + q + '"> #mq-test-1 { width: 42px; }</style>';
-      docElem.insertBefore(fakeBody, refNode);
-      bool = div.offsetWidth === 42;
-      docElem.removeChild(fakeBody);
-      return {
-        matches: bool,
-        media: q
-      };
-    };
-  }(w.document);
-})(this);
-
-/*! Respond.js v1.4.0: min/max-width media query polyfill. (c) Scott Jehl. MIT Lic. j.mp/respondjs  */
-(function(w) {
-  "use strict";
-  var respond = {};
-  w.respond = respond;
-  respond.update = function() {};
-  var requestQueue = [], xmlHttp = function() {
-    var xmlhttpmethod = false;
-    try {
-      xmlhttpmethod = new w.XMLHttpRequest();
-    } catch (e) {
-      xmlhttpmethod = new w.ActiveXObject("Microsoft.XMLHTTP");
-    }
-    return function() {
-      return xmlhttpmethod;
-    };
-  }(), ajax = function(url, callback) {
-    var req = xmlHttp();
-    if (!req) {
-      return;
-    }
-    req.open("GET", url, true);
-    req.onreadystatechange = function() {
-      if (req.readyState !== 4 || req.status !== 200 && req.status !== 304) {
-        return;
-      }
-      callback(req.responseText);
-    };
-    if (req.readyState === 4) {
-      return;
-    }
-    req.send(null);
-  };
-  respond.ajax = ajax;
-  respond.queue = requestQueue;
-  respond.regex = {
-    media: /@media[^\{]+\{([^\{\}]*\{[^\}\{]*\})+/gi,
-    keyframes: /@(?:\-(?:o|moz|webkit)\-)?keyframes[^\{]+\{(?:[^\{\}]*\{[^\}\{]*\})+[^\}]*\}/gi,
-    urls: /(url\()['"]?([^\/\)'"][^:\)'"]+)['"]?(\))/g,
-    findStyles: /@media *([^\{]+)\{([\S\s]+?)$/,
-    only: /(only\s+)?([a-zA-Z]+)\s?/,
-    minw: /\([\s]*min\-width\s*:[\s]*([\s]*[0-9\.]+)(px|em)[\s]*\)/,
-    maxw: /\([\s]*max\-width\s*:[\s]*([\s]*[0-9\.]+)(px|em)[\s]*\)/
-  };
-  respond.mediaQueriesSupported = w.matchMedia && w.matchMedia("only all") !== null && w.matchMedia("only all").matches;
-  if (respond.mediaQueriesSupported) {
-    return;
-  }
-  var doc = w.document, docElem = doc.documentElement, mediastyles = [], rules = [], appendedEls = [], parsedSheets = {}, resizeThrottle = 30, head = doc.getElementsByTagName("head")[0] || docElem, base = doc.getElementsByTagName("base")[0], links = head.getElementsByTagName("link"), lastCall, resizeDefer, eminpx, getEmValue = function() {
-    var ret, div = doc.createElement("div"), body = doc.body, originalHTMLFontSize = docElem.style.fontSize, originalBodyFontSize = body && body.style.fontSize, fakeUsed = false;
-    div.style.cssText = "position:absolute;font-size:1em;width:1em";
-    if (!body) {
-      body = fakeUsed = doc.createElement("body");
-      body.style.background = "none";
-    }
-    docElem.style.fontSize = "100%";
-    body.style.fontSize = "100%";
-    body.appendChild(div);
-    if (fakeUsed) {
-      docElem.insertBefore(body, docElem.firstChild);
-    }
-    ret = div.offsetWidth;
-    if (fakeUsed) {
-      docElem.removeChild(body);
-    } else {
-      body.removeChild(div);
-    }
-    docElem.style.fontSize = originalHTMLFontSize;
-    if (originalBodyFontSize) {
-      body.style.fontSize = originalBodyFontSize;
-    }
-    ret = eminpx = parseFloat(ret);
-    return ret;
-  }, applyMedia = function(fromResize) {
-    var name = "clientWidth", docElemProp = docElem[name], currWidth = doc.compatMode === "CSS1Compat" && docElemProp || doc.body[name] || docElemProp, styleBlocks = {}, lastLink = links[links.length - 1], now = new Date().getTime();
-    if (fromResize && lastCall && now - lastCall < resizeThrottle) {
-      w.clearTimeout(resizeDefer);
-      resizeDefer = w.setTimeout(applyMedia, resizeThrottle);
-      return;
-    } else {
-      lastCall = now;
-    }
-    for (var i in mediastyles) {
-      if (mediastyles.hasOwnProperty(i)) {
-        var thisstyle = mediastyles[i], min = thisstyle.minw, max = thisstyle.maxw, minnull = min === null, maxnull = max === null, em = "em";
-        if (!!min) {
-          min = parseFloat(min) * (min.indexOf(em) > -1 ? eminpx || getEmValue() : 1);
-        }
-        if (!!max) {
-          max = parseFloat(max) * (max.indexOf(em) > -1 ? eminpx || getEmValue() : 1);
-        }
-        if (!thisstyle.hasquery || (!minnull || !maxnull) && (minnull || currWidth >= min) && (maxnull || currWidth <= max)) {
-          if (!styleBlocks[thisstyle.media]) {
-            styleBlocks[thisstyle.media] = [];
-          }
-          styleBlocks[thisstyle.media].push(rules[thisstyle.rules]);
-        }
-      }
-    }
-    for (var j in appendedEls) {
-      if (appendedEls.hasOwnProperty(j)) {
-        if (appendedEls[j] && appendedEls[j].parentNode === head) {
-          head.removeChild(appendedEls[j]);
-        }
-      }
-    }
-    appendedEls.length = 0;
-    for (var k in styleBlocks) {
-      if (styleBlocks.hasOwnProperty(k)) {
-        var ss = doc.createElement("style"), css = styleBlocks[k].join("\n");
-        ss.type = "text/css";
-        ss.media = k;
-        head.insertBefore(ss, lastLink.nextSibling);
-        if (ss.styleSheet) {
-          ss.styleSheet.cssText = css;
-        } else {
-          ss.appendChild(doc.createTextNode(css));
-        }
-        appendedEls.push(ss);
-      }
-    }
-  }, translate = function(styles, href, media) {
-    var qs = styles.replace(respond.regex.keyframes, "").match(respond.regex.media), ql = qs && qs.length || 0;
-    href = href.substring(0, href.lastIndexOf("/"));
-    var repUrls = function(css) {
-      return css.replace(respond.regex.urls, "$1" + href + "$2$3");
-    }, useMedia = !ql && media;
-    if (href.length) {
-      href += "/";
-    }
-    if (useMedia) {
-      ql = 1;
-    }
-    for (var i = 0; i < ql; i++) {
-      var fullq, thisq, eachq, eql;
-      if (useMedia) {
-        fullq = media;
-        rules.push(repUrls(styles));
-      } else {
-        fullq = qs[i].match(respond.regex.findStyles) && RegExp.$1;
-        rules.push(RegExp.$2 && repUrls(RegExp.$2));
-      }
-      eachq = fullq.split(",");
-      eql = eachq.length;
-      for (var j = 0; j < eql; j++) {
-        thisq = eachq[j];
-        mediastyles.push({
-          media: thisq.split("(")[0].match(respond.regex.only) && RegExp.$2 || "all",
-          rules: rules.length - 1,
-          hasquery: thisq.indexOf("(") > -1,
-          minw: thisq.match(respond.regex.minw) && parseFloat(RegExp.$1) + (RegExp.$2 || ""),
-          maxw: thisq.match(respond.regex.maxw) && parseFloat(RegExp.$1) + (RegExp.$2 || "")
-        });
-      }
-    }
-    applyMedia();
-  }, makeRequests = function() {
-    if (requestQueue.length) {
-      var thisRequest = requestQueue.shift();
-      ajax(thisRequest.href, function(styles) {
-        translate(styles, thisRequest.href, thisRequest.media);
-        parsedSheets[thisRequest.href] = true;
-        w.setTimeout(function() {
-          makeRequests();
-        }, 0);
-      });
-    }
-  }, ripCSS = function() {
-    for (var i = 0; i < links.length; i++) {
-      var sheet = links[i], href = sheet.href, media = sheet.media, isCSS = sheet.rel && sheet.rel.toLowerCase() === "stylesheet";
-      if (!!href && isCSS && !parsedSheets[href]) {
-        if (sheet.styleSheet && sheet.styleSheet.rawCssText) {
-          translate(sheet.styleSheet.rawCssText, href, media);
-          parsedSheets[href] = true;
-        } else {
-          if (!/^([a-zA-Z:]*\/\/)/.test(href) && !base || href.replace(RegExp.$1, "").split("/")[0] === w.location.host) {
-            if (href.substring(0, 2) === "//") {
-              href = w.location.protocol + href;
-            }
-            requestQueue.push({
-              href: href,
-              media: media
-            });
-          }
-        }
-      }
-    }
-    makeRequests();
-  };
-  ripCSS();
-  respond.update = ripCSS;
-  respond.getEmValue = getEmValue;
-  function callMedia() {
-    applyMedia(true);
-  }
-  if (w.addEventListener) {
-    w.addEventListener("resize", callMedia, false);
-  } else if (w.attachEvent) {
-    w.attachEvent("onresize", callMedia);
-  }
-})(this);

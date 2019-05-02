@@ -2,7 +2,7 @@ const express = require('express'),
   path = require('path');
 
 
-const port = process.env.PORT || 8003;
+const port = 8323;
 const app = express();
 
 app.use(express.static('.'));

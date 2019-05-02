@@ -14,7 +14,7 @@ theme_dir: material
 
 # Options
 extra:
-  version: 0.2.5
+  #version: 0.2.5
   logo: images/logo.svg
   github:
     download_release: true
@@ -44,21 +44,16 @@ pages:
   - Home: 'index.html'
   - About : 'about.md'
   - Download : 'register.html'
-  - _Real_Download : 'download.md'
   - Installation: 'installation.md'
   - Getting Started : 'getting-started.md'
   - Methods: 'methods/index.md'
   - Tutorials: 'tutorials/index.md'
-#  - Glossary: 'glossary.md'
   - Resources: 'resources.md'
   - '_________' : 'methods/general.md'
-  - '_________' : 'methods/selection-methods.md'
-  - '_________' : 'methods/other/evo.md'
-  - '________' : 'methods/other/fel-contrast.md'
-  # '________' will hide the item from the toc
-#  - Scripting language: 'language.md'
+  - '_________' : 'methods/standard-analyses.md'
+  - '_________' : 'methods/stand-alone-analyses.md'
+  - '_________' : 'methods/fel-contrast.md'
   - '_________' : 'tutorials/CLI-tutorial.md'
   - '_________' : 'tutorials/CL-prompt-tutorial.md'
   - '_________' : 'tutorials/gui-tutorial.md'
   - '_________' : 'tutorials/phylotree.md' 
-#    - v2.3 Quick Start : 'tutorials/dev-branch-tutorial.md'

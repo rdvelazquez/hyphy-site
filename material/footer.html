@@ -1,1 +1,42 @@
-<div class="container citation-footer">  <p>HyPhy is funded jointly by <a                 href="https://projectreporter.nih.gov/project_info_details.cfm?aid=9102131"                 target="_blank">MIDAS</a> and <a                 href="https://projectreporter.nih.gov/project_info_description.cfm?aid=8886417"                 target="_blank">NIH award R01 GM093939</a></p></div>
+{% if include_next_prev %}
+  <nav class="pagination" aria-label="Footer">
+    <div class="previous">
+      {% if previous_page %}
+        <a href="{{ previous_page.url }}" title="{{ previous_page.title }}">
+          <span class="direction">
+            {{ config.extra.get("i18n", {}).prev | default("Previous") }}
+          </span>
+          <div class="page">
+            <div class="button button-previous" role="button" aria-label="Previous">
+              <i class="icon icon-back"></i>
+            </div>
+            <div class="stretch">
+              <div class="title">
+                {{ previous_page.title }}
+              </div>
+            </div>
+          </div>
+        </a>
+      {% endif %}
+    </div>
+    <div class="next">
+      {% if next_page %}
+        <a href="{{ next_page.url }}" title="{{ next_page.title }}">
+          <span class="direction">
+            {{ config.extra.get("i18n", {}).next | default("Next") }}
+          </span>
+          <div class="page">
+            <div class="stretch">
+              <div class="title">
+                {{ next_page.title }}
+              </div>
+            </div>
+            <div class="button button-next" role="button" aria-label="Next">
+              <i class="icon icon-forward"></i>
+            </div>
+          </div>
+        </a>
+      {% endif %}
+    </div>
+  </nav>
+{% endif %}
